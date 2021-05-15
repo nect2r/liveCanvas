@@ -19,8 +19,11 @@
 		    width: 90px;
 		}
 	</style>
+	<script src="/chat/resources/js/fabric.min.js"></script>
+	<meta charset="utf-8">
 </head>
 <body>
+	<canvas id="c" width="1000" height="500"></canvas>
 	<div id="chat_box"></div>
     <input type="text" id="msg">
     <button id="msg_process">전송</button>
@@ -28,8 +31,14 @@
 		<script src="http://localhost:82/socket.io/socket.io.js"></script>
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
         <script>
+       		var socket = io("http://localhost:82");
+        
 	        $(document).ready(function(){
-	            var socket = io("http://localhost:82");
+	        	console.log(socket);
+	        	console.log(socket.client.conn.server.clientsCount);
+	        	canvas = window._canvas = new fabric.Canvas('c');
+	    	    canvas.isDrawingMode= 1;
+	    	    canvas.freeDrawingBrush.width = 20;
 	            
 	            //msg에서 키를 누를떄
 	            $("#msg").keydown(function(key){
@@ -52,7 +61,20 @@
 	                //div 태그를 만들어 텍스트를 msg로 지정을 한뒤 #chat_box에 추가를 시켜준다.
 	                $('<div></div>').text(msg).appendTo("#chat_box");
 	            });
+	            
+	            swapVisibleObject();
 	        });
+	        
+	        function swapVisibleObject(event) {
+	        	console.log(socket);
+            	playAlert = setInterval(function() {
+            		socket.emit("send_canvas", JSON.stringify(canvas));
+ 	                
+ 	                socket.on('send_canvas', function(msg) {
+ 	                	canvas.loadFromJSON(msg);
+ 	                });
+        		}, 1000);
+    	    }
         </script>
 </body>
 </html>
